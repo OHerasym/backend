@@ -44,6 +44,36 @@ class PageAnalytics:
             return True
         return False
 
+    def get_biography(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['biography']
+
+    def get_followers_count(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['edge_followed_by']['count']
+
+    def get_full_name(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['full_name']
+
+    def is_business_account(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['is_business_account']
+
+    def is_account_verified(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['is_verified']
+
+    def get_profile_pic(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        json_page = json.loads(page)
+        return json_page['graphql']['user']['profile_pic_url_hd']
+
     def total_likes(self):
         count = 0
         for edge in self.photo_likes:
