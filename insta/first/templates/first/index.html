@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<head>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<link href="{{ STATIC_URL }}/twitter_bootstrap/css/button.css" rel="stylesheet">
+
+
+<style type="text/css">
+      body {padding-top:400px;}
+    </style>
+</head>
+
+
+
+<center>
+<form action="your-name/" method="post">
+    <label for="your_name">Instagram username: </label>
+    <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
+    <!-- {% csrf_token %} -->
+    <!-- {{ form }} -->
+    <input type="submit" value="OK">
+</form>
+</center>
