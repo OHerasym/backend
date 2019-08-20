@@ -10,6 +10,25 @@ from .forms import InstagramUserForm
 
 from .test_get_page import PageAnalytics
 
+from celery import shared_task
+from celery_progress.backend import ProgressRecorder
+import time
+
+@shared_task(bind=True)
+def my_task(self, seconds):
+    progress_recorder = ProgressRecorder(self)
+    for i in range(seconds):
+        print('123123')
+        time.sleep(1)
+        progress_recorder.set_progress(i + 1, seconds)
+    return 'done'
+
+
+def progress_view(request):
+    result = my_task.delay(10)
+    return render(request, 'name.html', context={'task_id': result.task_id})
+
+
 def get_name(request):
     b = request.read()
     print(b)
@@ -29,12 +48,9 @@ def get_name(request):
             response = ''
             if insta_username:
                 obj = PageAnalytics()
-                obj.analyze(insta_username)
-                response += obj.get_str_data()
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-            # return HttpResponseRedirect('/thanks/')
+                # obj.analyze(insta_username)
+                response += obj.get_str_data(insta_username)
+
             return HttpResponse(response, content_type='text/plain')
 
     # if a GET (or any other method) we'll create a blank form
@@ -44,12 +60,18 @@ def get_name(request):
     return render(request, 'first/name.html', {'form': form})
 
 def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    template = loader.get_template('first/index.html')
-    context = {
-        'latest_question_list': latest_question_list,
-    }
-    return HttpResponse(template.render(context, request))
+    print('1')
+    # result = my_task.delay(10)
+    my_task(10)
+    # result.task_id = 1
+    print('2')
+    return render(request, 'first/name.html', context={'task_id': 1})
+    # latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    # template = loader.get_template('first/index.html')
+    # context = {
+    #     'latest_question_list': latest_question_list,
+    # }
+    # return HttpResponse(template.render(context, request))
 
 
 def detail(request, question_id):

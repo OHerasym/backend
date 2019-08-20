@@ -14,6 +14,7 @@ nakrukta_tags = ['#likeforlike', '#followme', '#likeforfollow']
 class PageAnalytics:
     def __init__(self):
         self.username_id = ''
+        self.a1_object = None
         self.likes = []
         self.photo_likes = []
 
@@ -26,53 +27,38 @@ class PageAnalytics:
         fp.close()
         return page
 
+    def _get_a1_object(self, username):
+        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
+        self.a1_object = json.loads(page)
 
     def get_id_by_username(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['id']
+        return self.a1_object['graphql']['user']['id']
 
     def get_total_edges(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['edge_owner_to_timeline_media']['count']
+        return self.a1_object['graphql']['user']['edge_owner_to_timeline_media']['count']
 
     def is_page_private(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        if json_page['graphql']['user']['is_private']:
+        if self.a1_object['graphql']['user']['is_private']:
             return True
         return False
 
     def get_biography(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['biography']
+        return self.a1_object['graphql']['user']['biography']
 
     def get_followers_count(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['edge_followed_by']['count']
+        return self.a1_object['graphql']['user']['edge_followed_by']['count']
 
     def get_full_name(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['full_name']
+        return self.a1_object['graphql']['user']['full_name']
 
     def is_business_account(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['is_business_account']
+        return self.a1_object['graphql']['user']['is_business_account']
 
     def is_account_verified(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['is_verified']
+        return self.a1_object['graphql']['user']['is_verified']
 
     def get_profile_pic(self, username):
-        page = self.get_page('https://www.instagram.com/' + username + '/?__a=1')
-        json_page = json.loads(page)
-        return json_page['graphql']['user']['profile_pic_url_hd']
+        return self.a1_object['graphql']['user']['profile_pic_url_hd']
 
     def total_likes(self):
         count = 0
@@ -426,13 +412,22 @@ class PageAnalytics:
 
         return first_page_json['entry_data']['ProfilePage'][0]['graphql']
 
-    def get_str_data(self):
+    def get_str_data(self, username):
+        self._get_a1_object(username)
         result = ''
-        result += 'photo count = ' + str(len(self.photo_likes))
-        result += '\nvideo count = ' + str(len(self.likes))
-        result += '\nTotal likes = ' + str(self.total_likes())
-        result += '\nTotal comments = ' + str(self.total_comments())
-        result += '\n\nTotal = ' + str(len(self.photo_likes) + len(self.likes))
+        result += 'Total posts = ' + str(self.get_total_edges(username))
+        result += '\nBiography: ' + self.get_biography(username)
+        result += '\nIs page private: ' + str(self.is_page_private(username))
+        result += '\nFollowers count: ' + str(self.get_followers_count(username))
+        result += '\nFull name: ' + self.get_full_name(username)
+        result += '\nIs business account: ' + str(self.is_business_account(username))
+        result += '\nIs account verified: ' + str(self.is_account_verified(username))
+        result += '\nImage link: ' + self.get_profile_pic(username)
+        # result += 'photo count = ' + str(len(self.photo_likes))
+        # result += '\nvideo count = ' + str(len(self.likes))
+        # result += '\nTotal likes = ' + str(self.total_likes())
+        # result += '\nTotal comments = ' + str(self.total_comments())
+        # result += '\n\nTotal = ' + str(len(self.photo_likes) + len(self.likes))
         return result
 
     def analyze(self, username):
