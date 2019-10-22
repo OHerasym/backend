@@ -14,6 +14,10 @@ from celery import shared_task
 from celery_progress.backend import ProgressRecorder
 import time
 
+from django.core.mail import send_mail
+from django.conf import settings
+
+
 @shared_task(bind=True)
 def my_task(self, seconds):
     progress_recorder = ProgressRecorder(self)
@@ -48,10 +52,20 @@ def get_name(request):
             response = ''
             if insta_username:
                 obj = PageAnalytics()
-                # obj.analyze(insta_username)
+
                 response += obj.get_str_data(insta_username)
 
-            return HttpResponse(response, content_type='text/plain')
+                subject = 'Test Instagram Analytics'
+                message = response
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = ['oolleehh@gmail.com',]
+
+                # send_mail( subject, message, email_from, recipient_list)
+
+                url = obj.get_profile_pic(insta_username)
+
+            # return HttpResponse(response, content_type='text/plain')
+            return render(request, 'first/result.html', {'test' : obj.get_full_name(insta_username), 'result' : response , 'image_url' : url })
 
     # if a GET (or any other method) we'll create a blank form
     else:
@@ -60,18 +74,12 @@ def get_name(request):
     return render(request, 'first/name.html', {'form': form})
 
 def index(request):
-    print('1')
-    # result = my_task.delay(10)
-    my_task(10)
-    # result.task_id = 1
-    print('2')
-    return render(request, 'first/name.html', context={'task_id': 1})
-    # latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    # template = loader.get_template('first/index.html')
-    # context = {
-    #     'latest_question_list': latest_question_list,
-    # }
-    # return HttpResponse(template.render(context, request))
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    template = loader.get_template('first/index.html')
+    context = {
+        'latest_question_list': latest_question_list,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def detail(request, question_id):

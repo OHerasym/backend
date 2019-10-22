@@ -22,3 +22,8 @@ class Choice(models.Model):
 
     def __str__(self):
     	return self.choice_text
+
+
+class TestModel(models.Model):
+	def test(self):
+		return "test test"
